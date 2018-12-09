@@ -73,5 +73,37 @@ measure_freq_ecg2 = 204.73; % Hz
     
     %find pwl noise frequency ecg and ecg2
     thresh = 44; %Hz
-    PLN_freq_ecg = freq_ecg(find(freq_ecg > thresh,1));
-    PLN_freq_ecg2 = freq_ecg2(find(freq_ecg2 > thresh,1));
+    PLN_freq_degrees_ecg = freq_ecg(find(freq_ecg > thresh,1));
+    PLN_freq_degrees_ecg2 = freq_ecg2(find(freq_ecg2 > thresh,1)); 
+    
+    %calculate notch filters:
+    a = 0.9;
+    %ecg:
+    PLN_freq_radials_ecg = (PLN_freq_degrees_ecg / 180) * pi;
+    PLN_z1_ecg = cos(PLN_freq_radials_ecg) + 1j * sin(PLN_freq_radials_ecg);
+    PLN_z2_ecg = conj(PLN_z1_ecg);
+    
+    Numerator_ecg = {[1 -PLN_z1_ecg] ; [1 -PLN_z2_ecg]};
+    Denominator_ecg = {[1 -a * PLN_z1_ecg] ; [1 - a * PLN_z2_ecg]};
+    
+    H_notch_ecg = filt(Numerator_ecg, Denominator_ecg, measure_freq_ecg);
+    %ecg2
+    PLN_freq_radials_ecg2 = (PLN_freq_degrees_ecg2 / 180) * pi;
+    PLN_z1_ecg2 = cos(PLN_freq_radials_ecg2) + 1j * sin(PLN_freq_radials_ecg2);
+    PLN_z2_ecg2 = conj(PLN_z1_ecg2);
+    
+    Numerator_ecg2 = {[1 -PLN_z1_ecg2] ; [1 -PLN_z2_ecg2]};
+    Denominator_ecg2 = {[1 -a * PLN_z1_ecg2] ; [1 - a * PLN_z2_ecg2]};
+    
+    H_notch_ecg2 = filt(Numerator_ecg2, Denominator_ecg2, measure_freq_ecg2);
+    
+    % filter data
+    
+    
+    
+    
+    
+    
+    
+    
+    
