@@ -5,14 +5,15 @@ clear;
 %% load data
 load("ecg.mat");
 load("ecg2.mat");
-
 measure_freq_ecg = 1000; % Hz 
 measure_freq_ecg2 = 204.73; % Hz 
+
 %% get amount ecg data points
 [ecg_rijen, ~] = size(ecg);
 [ecg2_rijen, ~] = size(ecg2);
 
-%% Task 1:
+%% Task 1:    
+%visualize sample data:
     % tijdswaarden toevoegen aan ecg data
     %voeg kolom met eenen toe
     ecg_tijdskolom = [ones(ecg_rijen, 1), ecg];
@@ -20,6 +21,8 @@ measure_freq_ecg2 = 204.73; % Hz
     %verander enen naar tijdswaarden en plot
     ecg_tijdskolom = convert_to_time_and_plot(ecg_tijdskolom, measure_freq_ecg, ecg_rijen);
     ecg2_tijdskolom = convert_to_time_and_plot(ecg2_tijdskolom, measure_freq_ecg2, ecg2_rijen);
+    
+    
 %% Task 2:
 % powerline spectrum:
     %visualization
