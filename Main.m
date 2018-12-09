@@ -46,7 +46,15 @@ measure_freq_ecg2 = 204.73; % Hz
     P1_ecg(2:end-1) = 2 * P1_ecg(2:end-1);
     f_ecg = measure_freq_ecg *(0:(ecg_rijen/2))/ecg_rijen;
     figure
-    plot( f_ecg,P1_ecg)
+    hold on
+    plot(f_ecg, P1_ecg)
+    [FFT_amp_ecg, freq_ecg] = findpeaks(P1_ecg, 'MinPeakDistance',2 , 'MinPeakHeight', 0.02);
+    plot(freq_ecg, FFT_amp_ecg, 'x');
+%     xlabel('Frequency [Hz]');
+%     ylabel('Amplitude');
+%     legend('FFT');
+    hold off
+    
     %ecg2
     FFT_ecg2 = fft(ecg2);
     P2_ecg2 = abs(FFT_ecg2 / ecg2_rijen);
@@ -54,4 +62,11 @@ measure_freq_ecg2 = 204.73; % Hz
     P1_ecg2(2:end-1) = 2 * P1_ecg2(2:end-1);
     f_ecg2 = measure_freq_ecg2 *(0:(ecg2_rijen/2))/ecg2_rijen;
     figure
+    hold on
     plot( f_ecg2,P1_ecg2)
+%     [FFT_amp_ecg2, freq_ecg2] = findpeaks(P1_ecg2, 'MinPeakDistance',5, 'MinPeakHeight', 0.02);
+%     plot(freq_ecg2, FFT_amp_ecg2, 'x');
+%     xlabel('Frequency [Hz]');
+%     ylabel('Amplitude');
+%     legend('FFT');
+    hold off
