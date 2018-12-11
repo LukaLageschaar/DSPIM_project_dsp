@@ -29,17 +29,32 @@ measure_freq_ecg2 = 204.73; % Hz
     [FFT_amp_ecg, freq_ecg] = calculate_FFT(ecg, ecg_rijen, measure_freq_ecg);
     [FFT_amp_ecg2, freq_ecg2] = calculate_FFT(ecg2, ecg2_rijen, measure_freq_ecg2);
     
-    %find pwl noise frequency ecg and ecg2
-    thresh = 44; %Hz
+    %find PL noise frequency ecg and ecg2
+    thresh = 44; %Hz 50 are 60 Hz are sources for the PLN
     PLN_freq_degrees_ecg = freq_ecg(find(freq_ecg > thresh,1));
     PLN_freq_degrees_ecg2 = freq_ecg2(find(freq_ecg2 > thresh,1)); 
     
-    %calculate notch filters:
+    %calculate notch filters Transfer Functions:
     a = 0.9;
-    H_notch_ecg = calculate_notch_with_conj(PLN_freq_degrees_ecg, a, measure_freq_ecg);    
-    H_notch_ecg2 = calculate_notch_with_conj(PLN_freq_degrees_ecg2, a, measure_freq_ecg2);   
+%     H_notch_ecg = calculate_notch_with_conj(PLN_freq_degrees_ecg, a, measure_freq_ecg);    
+%     H_notch_ecg2 = calculate_notch_with_conj(PLN_freq_degrees_ecg2, a, measure_freq_ecg2);   
+
+
+    radials = (degrees / 180) * pi;
+    z1 = cos(radials) + 1j * sin(radials);
+    z2 = conj(z1);
+    
+%     Y/X = (z - z1)*(z-z2) / (z - a z1)*(z - a z2);
+%     Y (z - a z1)*(z- a z2) = X (z - z1)*(z-z2) / (z - z1)*(z-z2);
+%     Y (z^2 - (a*z1+a*z2)*z + a^2 * z1*z2)= X (z^2 - (z1+z2)*z + z1*z2)
+%     Y z^2 - Y *(a*z1+a*z2)*z +Y* a^2 * z1*z2= X z^2 - X*(z1+z2)*z + X* z1*z2
+%     Y(z) - Y(z-1) *(a*z1+a*z2) +Y(z-2)* a^2 * z1*z2= X(z) - X(z-1)*(z1+z2) + X(z-2)* z1*z2
+%implement:
+%Y(z) =  X(z) - X(z-1)*(z1+z2) + Y(z-1) *(a*z1+a*z2)+ X(z-2)* z1*z2 - Y(z-2)* a^2 * z1*z2;
     
     % filter data
+    
+    
     
     
     
