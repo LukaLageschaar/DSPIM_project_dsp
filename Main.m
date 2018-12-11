@@ -40,7 +40,7 @@ measure_freq_ecg2 = 204.73; % Hz
 %     H_notch_ecg2 = calculate_notch_with_conj(PLN_freq_degrees_ecg2, a, measure_freq_ecg2);   
 
 
-    radials = (degrees / 180) * pi;
+    radials = (PLN_freq_degrees_ecg *2*pi / measure_freq_ecg);
     z1 = cos(radials) + 1j * sin(radials);
     z2 = conj(z1);
     
@@ -53,9 +53,12 @@ measure_freq_ecg2 = 204.73; % Hz
 %Y(z) =  X(z) - X(z-1)*(z1+z2) + Y(z-1) *(a*z1+a*z2)+ X(z-2)* z1*z2 - Y(z-2)* a^2 * z1*z2;
     
     % filter data
+    Y = [ecg_tijdskolom(:,1), zeros(ecg_rijen,1)];
+    Y(1,2) = ecg_tijdskolom(1,2);
+    Y(2,2) = ecg_tijdskolom(2,2) - ecg_tijdskolom(1,2)*(z1+z2) + Y(1,2) *(a*z1+a*z2);
+    Y(3:end, 2) =  ecg_tijdskolom(3:end,2) - ecg_tijdskolom(2:end-1,2)*(z1+z2) + Y(2:end-1,2) *(a*z1+a*z2)+ ( ecg_tijdskolom(1:end-2,2) - Y(1:end-2,2) * a^2 )* z1*z2;
     
-    
-    
+    [FFT_amp_ecg, freq_ecg] = calculate_FFT(Y(:,2), ecg_rijen, measure_freq_ecg);
     
     
     
