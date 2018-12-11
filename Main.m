@@ -26,45 +26,17 @@ measure_freq_ecg2 = 204.73; % Hz
 %% Task 2:
 % powerline spectrum:
     %visualization
-    [FFT_amp_ecg, freq_ecg] = calculate_FFT(ecg, ecg_rijen, measure_freq_ecg);
-    [FFT_amp_ecg2, freq_ecg2] = calculate_FFT(ecg2, ecg2_rijen, measure_freq_ecg2);
+    [FFT_amp_ecg_0, freq_ecg_0] = calculate_FFT(ecg, ecg_rijen, measure_freq_ecg);
+    [FFT_amp_ecg2_0, freq_ecg2_0] = calculate_FFT(ecg2, ecg2_rijen, measure_freq_ecg2);
     
     %find PL noise frequency ecg and ecg2
     thresh = 44; %Hz 50 are 60 Hz are sources for the PLN
-    PLN_freq_degrees_ecg = freq_ecg(find(freq_ecg > thresh,1));
-    PLN_freq_degrees_ecg2 = freq_ecg2(find(freq_ecg2 > thresh,1)); 
+    PLN_freq_degrees_ecg_0 = freq_ecg_0(find(freq_ecg_0 > thresh,1));
+    PLN_freq_degrees_ecg2_0 = freq_ecg2_0(find(freq_ecg2_0 > thresh,1)); 
     
     %calculate notch filters Transfer Functions:
     a = 0.9;
-%     H_notch_ecg = calculate_notch_with_conj(PLN_freq_degrees_ecg, a, measure_freq_ecg);    
-%     H_notch_ecg2 = calculate_notch_with_conj(PLN_freq_degrees_ecg2, a, measure_freq_ecg2);   
-
-
-    radials = (PLN_freq_degrees_ecg *2*pi / measure_freq_ecg);
-    z1 = cos(radials) + 1j * sin(radials);
-    z2 = conj(z1);
-    
-%     Y/X = (z - z1)*(z-z2) / (z - a z1)*(z - a z2);
-%     Y (z - a z1)*(z- a z2) = X (z - z1)*(z-z2) / (z - z1)*(z-z2);
-%     Y (z^2 - (a*z1+a*z2)*z + a^2 * z1*z2)= X (z^2 - (z1+z2)*z + z1*z2)
-%     Y z^2 - Y *(a*z1+a*z2)*z +Y* a^2 * z1*z2= X z^2 - X*(z1+z2)*z + X* z1*z2
-%     Y(z) - Y(z-1) *(a*z1+a*z2) +Y(z-2)* a^2 * z1*z2= X(z) - X(z-1)*(z1+z2) + X(z-2)* z1*z2
-%implement:
-%Y(z) =  X(z) - X(z-1)*(z1+z2) + Y(z-1) *(a*z1+a*z2)+ X(z-2)* z1*z2 - Y(z-2)* a^2 * z1*z2;
-    
-    % filter data
-    Y = [ecg_tijdskolom(:,1), zeros(ecg_rijen,1)];
-    Y(1,2) = ecg_tijdskolom(1,2);
-    Y(2,2) = ecg_tijdskolom(2,2) - ecg_tijdskolom(1,2)*(z1+z2) + Y(1,2) *(a*z1+a*z2);
-    Y(3:end, 2) =  ecg_tijdskolom(3:end,2) - ecg_tijdskolom(2:end-1,2)*(z1+z2) + Y(2:end-1,2) *(a*z1+a*z2)+ ( ecg_tijdskolom(1:end-2,2) - Y(1:end-2,2) * a^2 )* z1*z2;
-    
-    [FFT_amp_ecg, freq_ecg] = calculate_FFT(Y(:,2), ecg_rijen, measure_freq_ecg);
-    
-    
-    
-    
-    
-    
+    [Notch_ecg, FFT_amp_ecg_1, freq_ecg_1] = calculate_notch_with_conj(ecg_tijdskolom, PLN_freq_degrees_ecg_0, a, measure_freq_ecg, ecg_rijen);
     
 %% personal function:
 function output = convert_to_time_and_plot(input, freq, rows)
@@ -98,13 +70,14 @@ function [amp, freq] = calculate_FFT(input, rijen, mfreq)
     hold off 
 end
 
-function Notch = calculate_notch_with_conj(degrees, a, freq)
-    radials = (degrees / 180) * pi;
+function [Notch, amp, freq_array_out] = calculate_notch_with_conj(input, degrees, a, freq, rows)
+    radials = degrees *2*pi / freq;
     z1 = cos(radials) + 1j * sin(radials);
     z2 = conj(z1);
-
-    Numerator_ecg = {[1 -z1] ; [1 -z2]};
-    Denominator_ecg = {[1 -a * z1] ; [1 - a * z2]};
-
-    Notch = filt(Numerator_ecg, Denominator_ecg, freq);
+    Notch = [input(:,1), zeros(rows,1)];
+    Notch(1,2) = input(1,2);
+    Notch(2,2) = input(2,2) - input(1,2)*(z1+z2) + Notch(1,2) *(a*z1+a*z2);
+    Notch(3:end, 2) =  input(3:end,2) - input(2:end-1,2)*(z1+z2) + Notch(2:end-1,2) *(a*z1+a*z2)+ ( input(1:end-2,2) - Notch(1:end-2,2) * a^2 )* z1*z2;
+    
+    [amp, freq_array_out] = calculate_FFT(Notch(:,2), rows, freq);
 end
