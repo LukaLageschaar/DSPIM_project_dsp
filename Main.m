@@ -1,7 +1,7 @@
 %% clear data
 clc;
 clear;
-
+close all;
 %% load data
 load("ecg.mat");
 load("ecg2.mat");
@@ -36,11 +36,13 @@ measure_freq_ecg2 = 204.73; % Hz
     
     %calculate notch and apply filters Transfer Functions:
     a = 0.9;
-    [Notch_ecg_1, FFT_amp_ecg_1, freq_ecg_1] = calculate_notch_with_conj(ecg_tijdskolom, PLN_freq_degrees_ecg_0, a, measure_freq_ecg, ecg_rijen);    
+    [Notch_ecg_1, FFT_amp_ecg_1, freq_ecg_1, z1_ecg, z2_ecg] = calculate_notch_with_conj(ecg_tijdskolom, PLN_freq_degrees_ecg_0, a, measure_freq_ecg, ecg_rijen);    
     [Notch_ecg_clean, FFT_amp_ecg_clean, freq_ecg_clean] = clean_notch(100, freq_ecg_1, Notch_ecg_1, a, measure_freq_ecg, ecg_rijen);
  
-    [Notch2_ecg, FFT_amp_ecg2_1, freq_ecg2_1] = calculate_notch_with_conj(ecg2_tijdskolom, PLN_freq_degrees_ecg2_0, a, measure_freq_ecg2, ecg2_rijen);
+    [Notch2_ecg, FFT_amp_ecg2_1, freq_ecg2_1, z1_ecg2, z2_ecg2] = calculate_notch_with_conj(ecg2_tijdskolom, PLN_freq_degrees_ecg2_0, a, measure_freq_ecg2, ecg2_rijen);
     
+%% Task 4
+    %impulse respons zie notch function
 %% personal functions:
 function output = convert_to_time_and_plot(input, freq, rows)
     output = input;
@@ -73,10 +75,11 @@ function [amp, freq] = calculate_FFT(input, rijen, mfreq)
     hold off 
 end
 
-function [Notch, amp, freq_array_out] = calculate_notch_with_conj(input, degrees, a, freq, rows)
+function [Notch, amp, freq_array_out, z1, z2] = calculate_notch_with_conj(input, degrees, a, freq, rows)
     radials = degrees *2*pi / freq;
     z1 = cos(radials) + 1j * sin(radials);
     z2 = conj(z1);
+    impulse_response(z1,z2);
     Notch = [input(:,1), zeros(rows,1)];
     Notch(1,2) = input(1,2);
     Notch(2,2) = input(2,2) - input(1,2)*(z1+z2) + Notch(1,2) *(a*z1+a*z2);
@@ -96,4 +99,17 @@ function [Notch_ecg, FFT_amp_ecg, freq_ecg] = clean_notch(thresh, ecg_freq, Notc
             thresh = freq;
         end
     end
+end
+
+function impulse_response(z1 ,z2)
+    sys = filt([1 -z1-z2 z1*z2],[1 -0.9*z1-0.9*z2 0.81*z1*z2]);
+    figure
+    impulse(sys);
+    title('impulse response');
+    figure
+    [Amp,freq_norm] = freqz([1 -z1-z2 z1*z2], [1 -0.9*z1-0.9*z2 0.81*z1*z2],2000);
+    plot(freq_norm/pi, 20*log10(abs(Amp)));
+    title('frequency response');
+    figure
+    bode(sys)
 end
