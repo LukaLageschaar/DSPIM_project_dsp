@@ -60,6 +60,11 @@ measure_freq_ecg2 = 204.73; % Hz
     z1 = cos(radials) + 1j * sin(radials);
     z2 = conj(z1);
     impulse_response(z1,z2);
+    
+%% Task 6
+z = tf('z', 1/measure_freq_ecg2);
+H = tf((z- 0.999882 - 1j * 0.015344) * (z- 0.999882 + 1j * 0.015344) * (z- 0.999925 - 1j * 0.012276)* (z- 0.999925 + 1j * 0.012276)* (z- 0.999958 - 1j * 0.009207)* (z- 0.999958 + 1j * 0.009207)* (z- 0.999981 - 1j * 0.006138)* (z- 0.999981 - 1j * 0.006138)* (z- 0.999995 - 1j * 0.003069)/(z^10));
+
 %% personal functions:
 function output = convert_to_time_and_plot(input, freq, rows)
     output = input;
