@@ -43,6 +43,23 @@ measure_freq_ecg2 = 204.73; % Hz
     
 %% Task 4
     %impulse respons zie notch function
+    %0
+    radials = 0;
+    z1 = cos(radials) + 1j * sin(radials);
+    z2 = conj(z1);
+    impulse_response(z1,z2);
+    
+    %fs/4
+    radials = pi/2;
+    z1 = cos(radials) + 1j * sin(radials);
+    z2 = conj(z1);
+    impulse_response(z1,z2);
+    
+    %fs/2
+    radials = pi;
+    z1 = cos(radials) + 1j * sin(radials);
+    z2 = conj(z1);
+    impulse_response(z1,z2);
 %% personal functions:
 function output = convert_to_time_and_plot(input, freq, rows)
     output = input;
