@@ -54,24 +54,11 @@ measure_freq_ecg2 = 204.73; % Hz
 %% Task 3
     % pen and paper, see report.
 %% Task 4
-%     %impulse respons zie notch function
-%     %0
-%     radials = 0;
-%     z1 = cos(radials) + 1j * sin(radials);
-%     z2 = conj(z1);
-%     impulse_response(z1,z2);
-%     
-%     %fs/4
-%     radials = pi/2;
-%     z1 = cos(radials) + 1j * sin(radials);
-%     z2 = conj(z1);
-%     impulse_response(z1,z2);
-%     
-%     %fs/2
-%     radials = pi;
-%     z1 = cos(radials) + 1j * sin(radials);
-%     z2 = conj(z1);
-%     impulse_response(z1,z2);
+    radials = PLN_freq_degrees_ecg_0 *2*pi / 1000;
+    z1 = cos(radials) + 1j * sin(radials);
+    z2 = conj(z1);
+    impulse_response(z1 ,z2);
+
 %% Task 5
     %ecg.mat
     figure
@@ -257,4 +244,5 @@ function impulse_response(z1 ,z2)
     title('impulse response');
     figure
     freqz(Num,Denum);
+    title('frequency response');
 end
