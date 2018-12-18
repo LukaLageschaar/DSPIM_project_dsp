@@ -62,9 +62,50 @@ measure_freq_ecg2 = 204.73; % Hz
     impulse_response(z1,z2);
     
 %% Task 6
-z = tf('z', 1/measure_freq_ecg2);
-H = tf((z- 0.999882 - 1j * 0.015344) * (z- 0.999882 + 1j * 0.015344) * (z- 0.999925 - 1j * 0.012276)* (z- 0.999925 + 1j * 0.012276)* (z- 0.999958 - 1j * 0.009207)* (z- 0.999958 + 1j * 0.009207)* (z- 0.999981 - 1j * 0.006138)* (z- 0.999981 - 1j * 0.006138)* (z- 0.999995 - 1j * 0.003069)/(z^10));
+%removing baseline wander 
+    HP_filter = designfilt('highpassfir',...       % Response type
+       'StopbandFrequency',0.3, ...     % Frequency constraints
+       'PassbandFrequency',0.5, ...
+       'StopbandAttenuation',55, ...    % Magnitude constraints
+       'PassbandRipple',2, ...
+       'DesignMethod','kaiserwin', ...  % Design method
+       'ScalePassband',false, ...       % Design method options
+       'SampleRate',measure_freq_ecg2);
+    ecg2_HP = filtfilt(HP_filter, ecg2);
+    ecg2_HP_tijdskolom = [ones(ecg2_rijen, 1), ecg2_HP];
+    %verander enen naar tijdswaarden en plot
+    ecg2_HP_tijdskolom = convert_to_time_and_plot(ecg2_HP_tijdskolom, measure_freq_ecg2, ecg2_rijen);
 
+% removing high frequency noise:
+    LP_filter = designfilt('lowpassfir', ...        % Response type
+       'PassbandFrequency',3, ...     % Frequency constraints
+       'StopbandFrequency',3.2, ...
+       'StopbandAttenuation',55, ...    % Magnitude constraints
+       'PassbandRipple',2, ...
+       'DesignMethod','kaiserwin', ...  % Design method
+       'ScalePassband',false, ...
+       'SampleRate',measure_freq_ecg2);
+    ecg2_LP = filtfilt(LP_filter, ecg2);
+    ecg2_LP_tijdskolom = [ones(ecg2_rijen, 1), ecg2_LP];
+    %verander enen naar tijdswaarden en plot
+    ecg2_LP_tijdskolom = convert_to_time_and_plot(ecg2_LP_tijdskolom, measure_freq_ecg2, ecg2_rijen);
+    
+    % removing both at the same time:
+    BP_filter = designfilt('bandpassfir', ...       % Response type
+       'StopbandFrequency1',0.3, ...    % Frequency constraints
+       'PassbandFrequency1',0.5, ...
+       'PassbandFrequency2',3, ...
+       'StopbandFrequency2',3.2, ...
+       'StopbandAttenuation1',55, ...    % Magnitude constraints
+       'PassbandRipple',2, ...
+       'StopbandAttenuation2',55, ...    % Magnitude constraints
+       'DesignMethod','kaiserwin', ...  % Design method
+       'ScalePassband',false, ...
+       'SampleRate',measure_freq_ecg2); 
+    ecg2_BP = filtfilt(BP_filter, ecg2);
+    ecg2_with_bp = [ones(ecg2_rijen, 1), ecg2_BP];
+    %verander enen naar tijdswaarden en plot
+    ecg2_with_bp = convert_to_time_and_plot(ecg2_with_bp, measure_freq_ecg2, ecg2_rijen);
 %% personal functions:
 function output = convert_to_time_and_plot(input, freq, rows)
     output = input;
