@@ -50,9 +50,6 @@ measure_freq_ecg2 = 204.73; % Hz
     [Notch_ecg2_1, z1_ecg2, z2_ecg2] = calculate_notch_with_conj(ecg2_timecolumn, PLN_freq_degrees_ecg2_0, a, measure_freq_ecg2, ecg2_rows);
     [~, ~] = calculate_FFT(Notch_ecg2_1(:,2), ecg2_rows, measure_freq_ecg2);
     title('ecg2.mat dataset na eenmalig te filteren met de Notch filter.')    
-%% Task 3
-    impulse_response(z1_ecg_1,z2_ecg_1);
-    impulse_response(z1_ecg2,z2_ecg2);
     pause;
 %% Task 4
     %impulse respons zie notch function
