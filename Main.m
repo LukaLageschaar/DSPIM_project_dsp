@@ -22,18 +22,20 @@ measure_freq_ecg2 = 204.73; % Hz
     ecg_tijdskolom = convert_to_time_and_plot(ecg_tijdskolom, measure_freq_ecg, ecg_rijen);
     ecg2_tijdskolom = convert_to_time_and_plot(ecg2_tijdskolom, measure_freq_ecg2, ecg2_rijen);
     
-    
+    pause;
 %% Task 2:
 % powerline spectrum:
     %visualization
     [FFT_amp_ecg_0, freq_ecg_0] = calculate_FFT(ecg, ecg_rijen, measure_freq_ecg);
+    title('FFT van ecg.mat')
     [FFT_amp_ecg2_0, freq_ecg2_0] = calculate_FFT(ecg2, ecg2_rijen, measure_freq_ecg2);
+    title('FFT van ecg2.mat')
     
     %find PL noise frequency ecg and ecg2
     thresh_0 = 44; %Hz 50 are 60 Hz are sources for the PLN
     PLN_freq_degrees_ecg_0 = freq_ecg_0(find(freq_ecg_0 > thresh_0,1));
     PLN_freq_degrees_ecg2_0 = freq_ecg2_0(find(freq_ecg2_0 > thresh_0,1)); 
-    
+  %%
     %calculate notch and apply filters Transfer Functions:
     a = 0.9;
     [Notch_ecg_1, FFT_amp_ecg_1, freq_ecg_1, z1_ecg, z2_ecg] = calculate_notch_with_conj(ecg_tijdskolom, PLN_freq_degrees_ecg_0, a, measure_freq_ecg, ecg_rijen);    
@@ -41,6 +43,7 @@ measure_freq_ecg2 = 204.73; % Hz
  
     [Notch2_ecg, FFT_amp_ecg2_1, freq_ecg2_1, z1_ecg2, z2_ecg2] = calculate_notch_with_conj(ecg2_tijdskolom, PLN_freq_degrees_ecg2_0, a, measure_freq_ecg2, ecg2_rijen);
     
+    pause;
 %% Task 4
     %impulse respons zie notch function
     %0
@@ -167,21 +170,33 @@ function [Notch, amp, freq_array_out, z1, z2] = calculate_notch_with_conj(input,
     Notch(1,2) = input(1,2);
     Notch(2,2) = input(2,2) - input(1,2)*(z1+z2) + Notch(1,2) *(a*z1+a*z2);
     Notch(3:end, 2) =  input(3:end,2) - input(2:end-1,2)*(z1+z2) + Notch(2:end-1,2) *(a*z1+a*z2)+ ( input(1:end-2,2) - Notch(1:end-2,2) * a^2 )* z1*z2;
-    
     [amp, freq_array_out] = calculate_FFT(Notch(:,2), rows, freq);
+    impulse_response(z1,z2);
 end
 
 function [Notch_ecg, FFT_amp_ecg, freq_ecg] = clean_notch(thresh, ecg_freq, Notch_ecg, a, freq, rows)
     freq_degrees = ecg_freq(find(ecg_freq > thresh,1));
     while( freq/2 > thresh)
-        [Notch_ecg, FFT_amp_ecg, freq_ecg] = calculate_notch_with_conj(Notch_ecg, freq_degrees, a, freq, rows);
+        [Notch_ecg, FFT_amp_ecg, freq_ecg, z1,z2] = calculate_notch_with_conj_clean(Notch_ecg, freq_degrees, a, freq, rows);
         freq_degrees = freq_ecg(find(freq_ecg > thresh,1));    
         thresh = freq_degrees - 50;
         [~,n] = size( freq_degrees);
         if n == 0
+            impulse_response(z1,z2);
             thresh = freq;
         end
     end
+end
+
+function [Notch, amp, freq_array_out, z1, z2] = calculate_notch_with_conj_clean(input, degrees, a, freq, rows)
+    radials = degrees *2*pi / freq;
+    z1 = cos(radials) + 1j * sin(radials);
+    z2 = conj(z1);
+    Notch = [input(:,1), zeros(rows,1)];
+    Notch(1,2) = input(1,2);
+    Notch(2,2) = input(2,2) - input(1,2)*(z1+z2) + Notch(1,2) *(a*z1+a*z2);
+    Notch(3:end, 2) =  input(3:end,2) - input(2:end-1,2)*(z1+z2) + Notch(2:end-1,2) *(a*z1+a*z2)+ ( input(1:end-2,2) - Notch(1:end-2,2) * a^2 )* z1*z2;
+    [amp, freq_array_out] = calculate_FFT(Notch(:,2), rows, freq);
 end
 
 function impulse_response(z1 ,z2)
