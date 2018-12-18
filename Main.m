@@ -78,8 +78,8 @@ measure_freq_ecg2 = 204.73; % Hz
 
 % removing high frequency noise:
     LP_filter = designfilt('lowpassfir', ...        % Response type
-       'PassbandFrequency',3, ...     % Frequency constraints
-       'StopbandFrequency',3.2, ...
+       'PassbandFrequency',40, ...     % Frequency constraints
+       'StopbandFrequency',40.2, ...
        'StopbandAttenuation',55, ...    % Magnitude constraints
        'PassbandRipple',2, ...
        'DesignMethod','kaiserwin', ...  % Design method
@@ -94,8 +94,8 @@ measure_freq_ecg2 = 204.73; % Hz
     BP_filter = designfilt('bandpassfir', ...       % Response type
        'StopbandFrequency1',0.3, ...    % Frequency constraints
        'PassbandFrequency1',0.5, ...
-       'PassbandFrequency2',3, ...
-       'StopbandFrequency2',3.2, ...
+       'PassbandFrequency2',40, ...
+       'StopbandFrequency2',40.2, ...
        'StopbandAttenuation1',55, ...    % Magnitude constraints
        'PassbandRipple',2, ...
        'StopbandAttenuation2',55, ...    % Magnitude constraints
@@ -106,6 +106,26 @@ measure_freq_ecg2 = 204.73; % Hz
     ecg2_with_bp = [ones(ecg2_rijen, 1), ecg2_BP];
     %verander enen naar tijdswaarden en plot
     ecg2_with_bp = convert_to_time_and_plot(ecg2_with_bp, measure_freq_ecg2, ecg2_rijen);
+    
+%% Task 7
+    LP_filter =designfilt('lowpassiir', ...        % Response type
+       'PassbandFrequency',55, ...     % Frequency constraints
+       'StopbandFrequency',55.2, ...
+       'PassbandRipple',2, ...          % Magnitude constraints
+       'StopbandAttenuation',55, ...
+       'DesignMethod','ellip', ...      % Design method
+       'MatchExactly','both', ...   % Design method options
+       'SampleRate',measure_freq_ecg);
+    ecg_LP = filtfilt(LP_filter, ecg);
+    ecg_LP_t = [ones(length(ecg_LP), 1), ecg_LP];
+    %verander enen naar tijdswaarden en plot
+    ecg_LP_t = convert_to_time_and_plot(ecg_LP_t, measure_freq_ecg, length(ecg_LP));
+    
+    
+    ecg_downsampled = downsample(ecg_LP, 10);
+    ecg_downsampled_tijdskolom = [ones(length(ecg_downsampled), 1), ecg_downsampled];
+    %verander enen naar tijdswaarden en plot
+    ecg_downsampled_tijdskolom = convert_to_time_and_plot(ecg_downsampled_tijdskolom, 6, length(ecg_downsampled));
 %% personal functions:
 function output = convert_to_time_and_plot(input, freq, rows)
     output = input;
