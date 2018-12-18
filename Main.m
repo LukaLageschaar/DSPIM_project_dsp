@@ -51,6 +51,8 @@ measure_freq_ecg2 = 204.73; % Hz
     [~, ~] = calculate_FFT(Notch_ecg2_1(:,2), ecg2_rows, measure_freq_ecg2);
     title('ecg2.mat dataset na eenmalig te filteren met de Notch filter.')    
     pause;
+%% Task 3
+    % pen and paper, see report.
 %% Task 4
     %impulse respons zie notch function
     %0
@@ -82,10 +84,10 @@ measure_freq_ecg2 = 204.73; % Hz
        'ScalePassband',false, ...       % Design method options
        'SampleRate',measure_freq_ecg2);
     ecg2_HP = filtfilt(HP_filter, ecg2);
-    ecg2_HP_tijdskolom = [ones(ecg2_rows, 1), ecg2_HP];
+    ecg2_HP_timecolumn = [ones(ecg2_rows, 1), ecg2_HP];
     %verander enen naar tijdswaarden en plot
-    ecg2_HP_tijdskolom = convert_to_time_and_plot(ecg2_HP_tijdskolom, measure_freq_ecg2, ecg2_rows);
-
+    ecg2_HP_timecolumn = convert_to_time_and_plot(ecg2_HP_timecolumn, measure_freq_ecg2, ecg2_rows);
+    title('Removing baseline wander from ecg2.mat')
 % removing high frequency noise:
     LP_filter = designfilt('lowpassfir', ...        % Response type
        'PassbandFrequency',40, ...     % Frequency constraints
@@ -96,9 +98,10 @@ measure_freq_ecg2 = 204.73; % Hz
        'ScalePassband',false, ...
        'SampleRate',measure_freq_ecg2);
     ecg2_LP = filtfilt(LP_filter, ecg2);
-    ecg2_LP_tijdskolom = [ones(ecg2_rows, 1), ecg2_LP];
+    ecg2_LP_timecolumn = [ones(ecg2_rows, 1), ecg2_LP];
     %verander enen naar tijdswaarden en plot
-    ecg2_LP_tijdskolom = convert_to_time_and_plot(ecg2_LP_tijdskolom, measure_freq_ecg2, ecg2_rows);
+    ecg2_LP_timecolumn = convert_to_time_and_plot(ecg2_LP_timecolumn, measure_freq_ecg2, ecg2_rows);
+    title('Removing high frequency noise from ecg2.mat')
     
     % removing both at the same time:
     BP_filter = designfilt('bandpassfir', ...       % Response type
@@ -116,7 +119,7 @@ measure_freq_ecg2 = 204.73; % Hz
     ecg2_with_bp = [ones(ecg2_rows, 1), ecg2_BP];
     %verander enen naar tijdswaarden en plot
     ecg2_with_bp = convert_to_time_and_plot(ecg2_with_bp, measure_freq_ecg2, ecg2_rows);
-    
+    title('Removing baseline wander and high frequency noise from ecg2.mat')
 %% Task 7
     LP_filter =designfilt('lowpassiir', ...        % Response type
        'PassbandFrequency',55, ...     % Frequency constraints
@@ -130,12 +133,13 @@ measure_freq_ecg2 = 204.73; % Hz
     ecg_LP_t = [ones(length(ecg_LP), 1), ecg_LP];
     %verander enen naar tijdswaarden en plot
     ecg_LP_t = convert_to_time_and_plot(ecg_LP_t, measure_freq_ecg, length(ecg_LP));
-    
+    title('Removing high frequency noise from ecg.mat')
     
     ecg_downsampled = downsample(ecg_LP, 10);
-    ecg_downsampled_tijdskolom = [ones(length(ecg_downsampled), 1), ecg_downsampled];
+    ecg_downsampled_timecolumn = [ones(length(ecg_downsampled), 1), ecg_downsampled];
     %verander enen naar tijdswaarden en plot
-    ecg_downsampled_tijdskolom = convert_to_time_and_plot(ecg_downsampled_tijdskolom, 6, length(ecg_downsampled));
+    ecg_downsampled_timecolumn = convert_to_time_and_plot(ecg_downsampled_timecolumn, 6, length(ecg_downsampled));
+    title('Downsampling cleaned ecg.mat bij factor 10')
 %% personal functions:
 function output = convert_to_time_and_plot(input, freq, rows)
     output = input;
