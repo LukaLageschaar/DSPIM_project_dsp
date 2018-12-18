@@ -99,12 +99,21 @@ measure_freq_ecg2 = 204.73; % Hz
     title('Effect van de Notch op ecg.mat uit te voeren tot er geen ongewenste pieken in FFT zijn ')
     
     
-    
-    i = imag( Notch_ecg_2(:,2));
-    r = real( Notch_ecg_2(:,2));
+    %ecg2.mat
+    figure
+    plot(ecg2_timecolumn(:,1), sqrt(ecg2_timecolumn(:,2).^2))
+    xlabel('Tijd(s)')
+    ylabel('Amplitude')
+    title('Absolute waarde amplitude ecg2.mat')
+    %Na eenmaal Notch toe te passen
+    i = imag( Notch_ecg2_1(:,2));
+    r = real( Notch_ecg2_1(:,2));
     a = sqrt(r.^2 + i.^2);
     figure
-    plot(ecg_timecolumn(:,1), a)
+    plot(ecg2_timecolumn(:,1), a)
+    xlabel('Tijd(s)')
+    ylabel('Amplitude')
+    title('Eenmalig Notch uitvoeren op ecg2.mat')
 %% Task 6
 %removing baseline wander 
     HP_filter = designfilt('highpassfir',...       % Response type
