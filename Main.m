@@ -72,7 +72,39 @@ measure_freq_ecg2 = 204.73; % Hz
     z1 = cos(radials) + 1j * sin(radials);
     z2 = conj(z1);
     impulse_response(z1,z2);
+%% Task 5
+    %ecg.mat
+    figure
+    plot(ecg_timecolumn(:,1), sqrt(ecg_timecolumn(:,2).^2))
+    xlabel('Tijd(s)')
+    ylabel('Amplitude')
+    title('Absolute waarde amplitude ecg.mat')
+    %Na eenmaal Notch toe te passen
+    i = imag( Notch_ecg_1(:,2));
+    r = real( Notch_ecg_1(:,2));
+    a = sqrt(r.^2 + i.^2);
+    figure
+    plot(ecg_timecolumn(:,1), a)
+    xlabel('Tijd(s)')
+    ylabel('Amplitude')
+    title('Effect van een Notch eenmalig uit te voeren op ecg.mat')
+    %Na het beindigen van het filter process
+    i = imag( Notch_ecg_2(:,2));
+    r = real( Notch_ecg_2(:,2));
+    a = sqrt(r.^2 + i.^2);
+    figure
+    plot(ecg_timecolumn(:,1), a)
+    xlabel('Tijd(s)')
+    ylabel('Amplitude')
+    title('Effect van de Notch op ecg.mat uit te voeren tot er geen ongewenste pieken in FFT zijn ')
     
+    
+    
+    i = imag( Notch_ecg_2(:,2));
+    r = real( Notch_ecg_2(:,2));
+    a = sqrt(r.^2 + i.^2);
+    figure
+    plot(ecg_timecolumn(:,1), a)
 %% Task 6
 %removing baseline wander 
     HP_filter = designfilt('highpassfir',...       % Response type
