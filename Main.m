@@ -190,5 +190,6 @@ function impulse_response(z1 ,z2)
     figure
     impz(Num,Denum,30);
     title('impulse response');
-    fvtool(Num,Denum)
+    figure
+    freqz(Num,Denum);
 end
