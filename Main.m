@@ -35,13 +35,12 @@ measure_freq_ecg2 = 204.73; % Hz
     thresh_0 = 44; %Hz 50 are 60 Hz are sources for the PLN
     PLN_freq_degrees_ecg_0 = freq_ecg_0(find(freq_ecg_0 > thresh_0,1));
     PLN_freq_degrees_ecg2_0 = freq_ecg2_0(find(freq_ecg2_0 > thresh_0,1)); 
-  %%
+
     %calculate notch and apply filters Transfer Functions:
     a = 0.9;
     [Notch_ecg_1, FFT_amp_ecg_1, freq_ecg_1, z1_ecg, z2_ecg] = calculate_notch_with_conj(ecg_tijdskolom, PLN_freq_degrees_ecg_0, a, measure_freq_ecg, ecg_rijen);    
-    [Notch_ecg_clean, FFT_amp_ecg_clean, freq_ecg_clean] = clean_notch(100, freq_ecg_1, Notch_ecg_1, a, measure_freq_ecg, ecg_rijen);
- 
     [Notch2_ecg, FFT_amp_ecg2_1, freq_ecg2_1, z1_ecg2, z2_ecg2] = calculate_notch_with_conj(ecg2_tijdskolom, PLN_freq_degrees_ecg2_0, a, measure_freq_ecg2, ecg2_rijen);
+    [Notch_ecg_clean, FFT_amp_ecg_clean, freq_ecg_clean] = clean_notch(100, freq_ecg_1, Notch_ecg_1, a, measure_freq_ecg, ecg_rijen);
     
     pause;
 %% Task 4
