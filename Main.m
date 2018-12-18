@@ -165,14 +165,10 @@ function [Notch_ecg, FFT_amp_ecg, freq_ecg] = clean_notch(thresh, ecg_freq, Notc
 end
 
 function impulse_response(z1 ,z2)
-    sys = filt([1 -z1-z2 z1*z2],[1 -0.9*z1-0.9*z2 0.81*z1*z2]);
+    Num = [1 -z1-z2 z1*z2];
+    Denum = [1 -0.9*z1-0.9*z2 0.81*z1*z2];
     figure
-    impulse(sys);
+    impz(Num,Denum,30);
     title('impulse response');
-    figure
-    [Amp,freq_norm] = freqz([1 -z1-z2 z1*z2], [1 -0.9*z1-0.9*z2 0.81*z1*z2],2000);
-    plot(freq_norm/pi, 20*log10(abs(Amp)));
-    title('frequency response');
-    figure
-    bode(sys)
+    fvtool(Num,Denum)
 end
