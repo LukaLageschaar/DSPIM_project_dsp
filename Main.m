@@ -1,34 +1,36 @@
-%% clear data
+%% clear workspace and commandline and close all figures
 clc;
 clear;
 close all;
-%% load data
+
+%% load provided data
 load("ecg.mat");
 load("ecg2.mat");
 measure_freq_ecg = 1000; % Hz 
 measure_freq_ecg2 = 204.73; % Hz 
 
 %% get amount ecg data points
-[ecg_rijen, ~] = size(ecg);
-[ecg2_rijen, ~] = size(ecg2);
+[ecg_rows, ~] = size(ecg);
+[ecg2_rows, ~] = size(ecg2);
 
 %% Task 1:    
 %visualize sample data:
-    % tijdswaarden toevoegen aan ecg data
-    %voeg kolom met eenen toe
-    ecg_tijdskolom = [ones(ecg_rijen, 1), ecg];
-    ecg2_tijdskolom = [ones(ecg2_rijen, 1), ecg2];
-    %verander enen naar tijdswaarden en plot
-    ecg_tijdskolom = convert_to_time_and_plot(ecg_tijdskolom, measure_freq_ecg, ecg_rijen);
-    ecg2_tijdskolom = convert_to_time_and_plot(ecg2_tijdskolom, measure_freq_ecg2, ecg2_rijen);
+    % add a column with time values to ecg data
+    ecg_timecolumn = [ones(ecg_rows, 1), ecg];
+    ecg_timecolumn = convert_to_time_and_plot(ecg_timecolumn, measure_freq_ecg, ecg_rows);
+		title("ECG.mat data infv de tijd in seconden");
+    
+	ecg2_timecolumn = [ones(ecg2_rows, 1), ecg2];
+    ecg2_timecolumn = convert_to_time_and_plot(ecg2_timecolumn, measure_freq_ecg2, ecg2_rows);
+		title("ECG2.mat data infv de tijd in seconden");
     
     pause;
 %% Task 2:
 % powerline spectrum:
     %visualization
-    [FFT_amp_ecg_0, freq_ecg_0] = calculate_FFT(ecg, ecg_rijen, measure_freq_ecg);
+    [FFT_amp_ecg_0, freq_ecg_0] = calculate_FFT(ecg, ecg_rows, measure_freq_ecg);
     title('FFT van ecg.mat')
-    [FFT_amp_ecg2_0, freq_ecg2_0] = calculate_FFT(ecg2, ecg2_rijen, measure_freq_ecg2);
+    [FFT_amp_ecg2_0, freq_ecg2_0] = calculate_FFT(ecg2, ecg2_rows, measure_freq_ecg2);
     title('FFT van ecg2.mat')
     
     %find PL noise frequency ecg and ecg2
@@ -38,10 +40,19 @@ measure_freq_ecg2 = 204.73; % Hz
 
     %calculate notch and apply filters Transfer Functions:
     a = 0.9;
-    [Notch_ecg_1, FFT_amp_ecg_1, freq_ecg_1, z1_ecg, z2_ecg] = calculate_notch_with_conj(ecg_tijdskolom, PLN_freq_degrees_ecg_0, a, measure_freq_ecg, ecg_rijen);    
-    [Notch2_ecg, FFT_amp_ecg2_1, freq_ecg2_1, z1_ecg2, z2_ecg2] = calculate_notch_with_conj(ecg2_tijdskolom, PLN_freq_degrees_ecg2_0, a, measure_freq_ecg2, ecg2_rijen);
-    [Notch_ecg_clean, FFT_amp_ecg_clean, freq_ecg_clean] = clean_notch(100, freq_ecg_1, Notch_ecg_1, a, measure_freq_ecg, ecg_rijen);
+    [Notch_ecg_1, z1_ecg_1, z2_ecg_1] = calculate_notch_with_conj(ecg_timecolumn, PLN_freq_degrees_ecg_0, a, measure_freq_ecg, ecg_rows);    
+    [~, freq_ecg_1] = calculate_FFT(Notch_ecg_1(:,2), ecg_rows, measure_freq_ecg);
+    title('ecg.mat dataset na eenmalig te filteren met de Notch filter.')
+    thresh_1 = 100;
+    [Notch_ecg_2, z1_ecg_2, z2_ecg_2] = clean_notch(thresh_1, freq_ecg_1, Notch_ecg_1, a, measure_freq_ecg, ecg_rows);
+
     
+    [Notch_ecg2_1, z1_ecg2, z2_ecg2] = calculate_notch_with_conj(ecg2_timecolumn, PLN_freq_degrees_ecg2_0, a, measure_freq_ecg2, ecg2_rows);
+    [~, ~] = calculate_FFT(Notch_ecg2_1(:,2), ecg2_rows, measure_freq_ecg2);
+    title('ecg2.mat dataset na eenmalig te filteren met de Notch filter.')    
+%% Task 3
+    impulse_response(z1_ecg_1,z2_ecg_1);
+    impulse_response(z1_ecg2,z2_ecg2);
     pause;
 %% Task 4
     %impulse respons zie notch function
@@ -74,9 +85,9 @@ measure_freq_ecg2 = 204.73; % Hz
        'ScalePassband',false, ...       % Design method options
        'SampleRate',measure_freq_ecg2);
     ecg2_HP = filtfilt(HP_filter, ecg2);
-    ecg2_HP_tijdskolom = [ones(ecg2_rijen, 1), ecg2_HP];
+    ecg2_HP_tijdskolom = [ones(ecg2_rows, 1), ecg2_HP];
     %verander enen naar tijdswaarden en plot
-    ecg2_HP_tijdskolom = convert_to_time_and_plot(ecg2_HP_tijdskolom, measure_freq_ecg2, ecg2_rijen);
+    ecg2_HP_tijdskolom = convert_to_time_and_plot(ecg2_HP_tijdskolom, measure_freq_ecg2, ecg2_rows);
 
 % removing high frequency noise:
     LP_filter = designfilt('lowpassfir', ...        % Response type
@@ -88,9 +99,9 @@ measure_freq_ecg2 = 204.73; % Hz
        'ScalePassband',false, ...
        'SampleRate',measure_freq_ecg2);
     ecg2_LP = filtfilt(LP_filter, ecg2);
-    ecg2_LP_tijdskolom = [ones(ecg2_rijen, 1), ecg2_LP];
+    ecg2_LP_tijdskolom = [ones(ecg2_rows, 1), ecg2_LP];
     %verander enen naar tijdswaarden en plot
-    ecg2_LP_tijdskolom = convert_to_time_and_plot(ecg2_LP_tijdskolom, measure_freq_ecg2, ecg2_rijen);
+    ecg2_LP_tijdskolom = convert_to_time_and_plot(ecg2_LP_tijdskolom, measure_freq_ecg2, ecg2_rows);
     
     % removing both at the same time:
     BP_filter = designfilt('bandpassfir', ...       % Response type
@@ -105,9 +116,9 @@ measure_freq_ecg2 = 204.73; % Hz
        'ScalePassband',false, ...
        'SampleRate',measure_freq_ecg2); 
     ecg2_BP = filtfilt(BP_filter, ecg2);
-    ecg2_with_bp = [ones(ecg2_rijen, 1), ecg2_BP];
+    ecg2_with_bp = [ones(ecg2_rows, 1), ecg2_BP];
     %verander enen naar tijdswaarden en plot
-    ecg2_with_bp = convert_to_time_and_plot(ecg2_with_bp, measure_freq_ecg2, ecg2_rijen);
+    ecg2_with_bp = convert_to_time_and_plot(ecg2_with_bp, measure_freq_ecg2, ecg2_rows);
     
 %% Task 7
     LP_filter =designfilt('lowpassiir', ...        % Response type
@@ -160,34 +171,32 @@ function [amp, freq] = calculate_FFT(input, rijen, mfreq)
     hold off 
 end
 
-function [Notch, amp, freq_array_out, z1, z2] = calculate_notch_with_conj(input, degrees, a, freq, rows)
+function [Notch, z1, z2] = calculate_notch_with_conj(input, degrees, a, freq, rows)
     radials = degrees *2*pi / freq;
     z1 = cos(radials) + 1j * sin(radials);
     z2 = conj(z1);
-    impulse_response(z1,z2);
     Notch = [input(:,1), zeros(rows,1)];
     Notch(1,2) = input(1,2);
     Notch(2,2) = input(2,2) - input(1,2)*(z1+z2) + Notch(1,2) *(a*z1+a*z2);
     Notch(3:end, 2) =  input(3:end,2) - input(2:end-1,2)*(z1+z2) + Notch(2:end-1,2) *(a*z1+a*z2)+ ( input(1:end-2,2) - Notch(1:end-2,2) * a^2 )* z1*z2;
-    [amp, freq_array_out] = calculate_FFT(Notch(:,2), rows, freq);
-    impulse_response(z1,z2);
 end
 
-function [Notch_ecg, FFT_amp_ecg, freq_ecg] = clean_notch(thresh, ecg_freq, Notch_ecg, a, freq, rows)
+function [Notch_ecg, z1, z2] = clean_notch(thresh, ecg_freq, Notch_ecg, a, freq, rows)
     freq_degrees = ecg_freq(find(ecg_freq > thresh,1));
     while( freq/2 > thresh)
-        [Notch_ecg, FFT_amp_ecg, freq_ecg, z1,z2] = calculate_notch_with_conj_clean(Notch_ecg, freq_degrees, a, freq, rows);
+        [Notch_ecg, z1,z2] = calculate_notch_with_conj_clean(Notch_ecg, freq_degrees, a, freq, rows);
+        [~,freq_ecg] = calculate_FFT(Notch_ecg(:,2), rows, freq);
+        title('filtered more than once with the Notch filter')
         freq_degrees = freq_ecg(find(freq_ecg > thresh,1));    
         thresh = freq_degrees - 50;
         [~,n] = size( freq_degrees);
         if n == 0
-            impulse_response(z1,z2);
             thresh = freq;
         end
     end
 end
 
-function [Notch, amp, freq_array_out, z1, z2] = calculate_notch_with_conj_clean(input, degrees, a, freq, rows)
+function [Notch, z1, z2] = calculate_notch_with_conj_clean(input, degrees, a, freq, rows)
     radials = degrees *2*pi / freq;
     z1 = cos(radials) + 1j * sin(radials);
     z2 = conj(z1);
@@ -195,7 +204,7 @@ function [Notch, amp, freq_array_out, z1, z2] = calculate_notch_with_conj_clean(
     Notch(1,2) = input(1,2);
     Notch(2,2) = input(2,2) - input(1,2)*(z1+z2) + Notch(1,2) *(a*z1+a*z2);
     Notch(3:end, 2) =  input(3:end,2) - input(2:end-1,2)*(z1+z2) + Notch(2:end-1,2) *(a*z1+a*z2)+ ( input(1:end-2,2) - Notch(1:end-2,2) * a^2 )* z1*z2;
-    [amp, freq_array_out] = calculate_FFT(Notch(:,2), rows, freq);
+   
 end
 
 function impulse_response(z1 ,z2)
